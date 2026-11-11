@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>車載操作ボタンパネル</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@700;800&display=swap');
+
+    body {
+      font-family: 'M PLUS 1p', sans-serif;
+      background: radial-gradient(circle at center, #1f2937 0%, #111827 100%);
+      user-select: none;
+    }
+
+    /* パネルの質感と影 */
+    .remote-casing {
+      background: linear-gradient(145deg, #374151 0%, #1f2937 50%, #111827 100%);
+      box-shadow: 
+        15px 25px 50px rgba(0,0,0,0.7),
+        inset 2px 2px 4px rgba(255,255,255,0.15),
+        inset -3px -3px 6px rgba(0,0,0,0.8);
+    }
+
+    /* 物理ボタンのベーススタイル */
+    .btn-physical {
+      background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 60%, #d1d5db 100%);
+      color: #111827;
+      border: 2px solid #6b7280;
+      box-shadow: 
+        0 6px 0 #374151,
+        0 10px 10px rgba(0, 0, 0, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.8);
+      transition: all 0.08s ease-out;
+      position: relative;
+    }
+
+    .btn-physical:active {
+      transform: translateY(4px);
+      box-shadow: 
+        0 2px 0 #374151,
+        0 4px 6px rgba(0, 0, 0, 0.4),
+        inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    /* 発光状態 - 緑 */
+    .glow-green {
+      background: linear-gradient(180deg, #dcfce7 0%, #86efac 100%) !important;
+      color: #064e3b !important;
+      border-color: #22c55e !important;
+      box-shadow: 
+        0 6px 0 #15803d,
+        0 0 20px rgba(34, 197, 94, 0.8),
+        0 0 40px rgba(34, 197, 94, 0.4),
+        inset 0 0 10px rgba(255, 255, 255, 0.9) !important;
+    }
+    .glow-green:active {
+      box-shadow: 
+        0 2px 0 #15803d,
+        0 0 15px rgba(34, 197, 94, 0.8),
+        inset 0 0 10px rgba(255, 255, 255, 0.9) !important;
+    }
+
+    /* 発光状態 - 赤 */
+    .glow-red {
+      background: linear-gradient(180deg, #ffe4e6 0%, #fca5a5 100%) !important;
+      color: #881337 !important;
+      border-color: #ef4444 !important;
+      box-shadow: 
+        0 6px 0 #b91c1c,
+        0 0 20px rgba(239, 68, 68, 0.8),
+        0 0 40px rgba(239, 68, 68, 0.4),
+        inset 0 0 10px rgba(255, 255, 255, 0.9) !important;
+    }
+    .glow-red:active {
+      box-shadow: 
+        0 2px 0 #b91c1c,
+        0 0 15px rgba(239, 68, 68, 0.8),
+        inset 0 0 10px rgba(255, 255, 255, 0.9) !important;
+    }
+
+    /* テキストの上下2段レイアウト */
+    .split-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.1;
+      letter-spacing: 0.05em;
+    }
+    .split-divider {
+      width: 80%;
+      height: 1.5px;
+      background-color: currentColor;
+      margin: 2px 0;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+  <!-- 車載リモコン本体 -->
+  <div class="remote-casing w-72 sm:w-80 rounded-3xl p-6 border-2 border-gray-600 relative">
+    
+    <!-- 上部フック/取り付けバー再現 -->
+    <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-40 h-4 bg-gray-700 rounded-t-lg border-t border-gray-500 shadow-md"></div>
+    
+    <!-- 操作面インセットパネル -->
+    <div class="bg-gray-800 rounded-2xl p-4 border border-gray-700 shadow-inner">
+      
+      <!-- 2列×3行のボタン配置 -->
+      <div class="grid grid-cols-2 gap-4">
+
+        <!-- 1. 出発 / 到着 ボタン -->
+        <button id="btn-dep-arr" class="btn-physical h-24 rounded-xl flex items-center justify-center text-xl font-extrabold" onclick="handleDepArr()">
+          <div class="split-text">
+            <span id="label-dep" class="opacity-100">出 発</span>
+            <div class="split-divider"></div>
+            <span id="label-arr" class="opacity-50">到 着</span>
+          </div>
+        </button>
+
+        <!-- 2. 高速 / 一般 ボタン -->
+        <button id="btn-road" class="btn-physical glow-green h-24 rounded-xl flex items-center justify-center text-xl font-extrabold" onclick="handleRoad()">
+          <div id="road-text-container" class="split-text">
+            <span id="label-kosoku" class="opacity-50">高 速</span>
+            <div class="split-divider"></div>
+            <span id="label-ippan" class="opacity-100 font-black">一 般</span>
+          </div>
+        </button>
+
+        <!-- 3. 休憩 ボタン -->
+        <button id="btn-kyukei" class="btn-physical glow-green h-24 rounded-xl flex items-center justify-center text-2xl font-extrabold tracking-widest" onclick="toggleGreenRed(this)">
+          休 憩
+        </button>
+
+        <!-- 4. 乗降 ボタン -->
+        <button id="btn-joko" class="btn-physical glow-green h-24 rounded-xl flex items-center justify-center text-2xl font-extrabold tracking-widest" onclick="toggleGreenRed(this)">
+          乗 降
+        </button>
+
+        <!-- 5. 待機 ボタン -->
+        <button id="btn-taiki" class="btn-physical glow-green h-24 rounded-xl flex items-center justify-center text-2xl font-extrabold tracking-widest" onclick="toggleGreenRed(this)">
+          待 機
+        </button>
+
+        <!-- 6. 回送 ボタン -->
+        <button id="btn-kaiso" class="btn-physical glow-green h-24 rounded-xl flex items-center justify-center text-2xl font-extrabold tracking-widest" onclick="toggleGreenRed(this)">
+          回 送
+        </button>
+
+      </div>
+    </div>
+
+    <!-- 下部ケーブル保護パーツ再現 -->
+    <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-12 h-5 bg-gray-700 rounded-b-xl border-b border-gray-600"></div>
+  </div>
+
+  <div class="mt-8 text-gray-400 text-xs text-center leading-relaxed">
+    <p>※ 「高速/一般」ボタンを押すと一般(緑)と高速(赤)が交互に切り替わり音声が流れます。</p>
+    <p>※ すべてのボタンが押すたびに緑発光と赤発光の2状態を交互に切り替えます。</p>
+  </div>
+
+  <script>
+    // 音声オブジェクトの準備
+    const audioIppan = new Audio('https://files.catbox.moe/i12rlw.wav');   // 一般 (緑)
+    const audioKosoku = new Audio('https://files.catbox.moe/pltc9z.wav');  // 高速 (赤)
+
+    // 音声再生ヘルパー関数 (連打時に最初から再生)
+    function playSound(audio) {
+      audio.currentTime = 0;
+      audio.play().catch(e => console.log('Audio play prevented:', e));
+    }
+
+    // 1. 出発 / 到着 ボタンの状態管理 (1: 出発(緑), 2: 到着(赤) の交互)
+    let depArrState = 1;
+    // 初期状態を緑発光に設定
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btn-dep-arr');
+      btn.classList.add('glow-green');
+    });
+
+    function handleDepArr() {
+      const btn = document.getElementById('btn-dep-arr');
+      const labelDep = document.getElementById('label-dep');
+      const labelArr = document.getElementById('label-arr');
+
+      depArrState = depArrState === 1 ? 2 : 1;
+      btn.classList.remove('glow-green', 'glow-red');
+
+      if (depArrState === 1) {
+        // 出発：緑
+        btn.classList.add('glow-green');
+        labelDep.className = 'opacity-100 font-black';
+        labelArr.className = 'opacity-40';
+      } else {
+        // 到着：赤
+        btn.classList.add('glow-red');
+        labelDep.className = 'opacity-40';
+        labelArr.className = 'opacity-100 font-black';
+      }
+    }
+
+    // 2. 高速 / 一般 ボタンの状態管理
+    // 1: 一般(緑), 2: 高速(赤)
+    let roadState = 1;
+
+    function handleRoad() {
+      const btn = document.getElementById('btn-road');
+      const textContainer = document.getElementById('road-text-container');
+
+      // 1 (一般) と 2 (高速) を交互に切り替え
+      roadState = roadState === 1 ? 2 : 1;
+
+      btn.classList.remove('glow-green', 'glow-red');
+
+      if (roadState === 1) {
+        // 一般 (緑)
+        btn.classList.add('glow-green');
+        textContainer.innerHTML = `
+          <span class="opacity-50">高 速</span>
+          <div class="split-divider"></div>
+          <span class="opacity-100 font-black">一 般</span>
+        `;
+        playSound(audioIppan);
+      } else {
+        // 高速 (赤)
+        btn.classList.add('glow-red');
+        textContainer.innerHTML = `
+          <span class="opacity-100 font-black">高 速</span>
+          <div class="split-divider"></div>
+          <span class="opacity-50">一 般</span>
+        `;
+        playSound(audioKosoku);
+      }
+    }
+
+    // 3. その他ボタン (休憩, 乗降, 待機, 回送) のトグル処理 (緑 ⇔ 赤 の交互)
+    function toggleGreenRed(btn) {
+      if (btn.classList.contains('glow-green')) {
+        btn.classList.remove('glow-green');
+        btn.classList.add('glow-red');
+      } else {
+        btn.classList.remove('glow-red');
+        btn.classList.add('glow-green');
+      }
+    }
+  </script>
+</body>
+</html>
